@@ -53,3 +53,40 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    doctor_profile = DoctorProfileSerializer(read_only=True)
+    patient_profile = PatientProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "role",
+            "doctor_profile",
+            "patient_profile",
+        ]
+        read_only_fields = ["email", "role"]
+
+
+class UserProfileUpdateSerializer(serializers.Serializer):
+    profile = serializers.DictField()
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.get("profile", {})
+
+        if instance.role == "DOCTOR":
+            profile, _ = DoctorProfile.objects.get_or_create(user=instance)
+        elif instance.role == "PATIENT":
+            profile, _ = PatientProfile.objects.get_or_create(user=instance)
+        else:
+            raise serializers.ValidationError("Admins have no editable profile.")
+
+        for attr, value in profile_data.items():
+            if hasattr(profile, attr):
+                setattr(profile, attr, value)
+
+        profile.save()
+        return instance

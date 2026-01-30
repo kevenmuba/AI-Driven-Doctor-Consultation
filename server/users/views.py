@@ -1,11 +1,16 @@
 # users/views.py
 from django.contrib.auth import authenticate
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
-from users.serializers import UserLoginSerializer, UserRegisterSerializer
+from users.serializers import (
+    UserLoginSerializer,
+    UserProfileSerializer,
+    UserProfileUpdateSerializer,
+    UserRegisterSerializer,
+)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -42,3 +47,25 @@ class LoginView(generics.GenericAPIView):
 
         refresh = RefreshToken.for_user(user)
         return Response({"access": str(refresh.access_token), "refresh": str(refresh)})
+
+
+class MeView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return UserProfileUpdateSerializer
+        return UserProfileSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            instance=request.user,
+            data=request.data,
+            partial=True,  # ✅ VERY IMPORTANT
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(UserProfileSerializer(request.user).data)

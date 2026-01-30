@@ -4,7 +4,9 @@ from users.models import User
 
 
 class DoctorProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="doctor_profile"
+    )
     specialty = models.CharField(max_length=100)
     years_experience = models.PositiveIntegerField()
     bio = models.TextField(blank=True)
