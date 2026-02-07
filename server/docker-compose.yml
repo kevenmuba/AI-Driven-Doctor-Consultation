@@ -1,4 +1,4 @@
-version: "3.9"
+
 
 services:
   db:
@@ -19,6 +19,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+    env_file:
+      - .env 
     environment:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${SECRET_KEY}
@@ -27,6 +29,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
+      OPENAI_API_KEY: ${GOOGLE_API_KEY}
     depends_on:
       - db
 
