@@ -1,3 +1,5 @@
+from chat.models import ChatRoom
+
 from .models import Appointment
 
 
@@ -20,4 +22,14 @@ def create_appointment(patient, doctor, scheduled_time, ai_reason=None):
 def update_appointment_status(appointment, status):
     appointment.status = status
     appointment.save()
+
+    # ✅ When accepted → create chat room
+    if status == "ACCEPTED":
+        ChatRoom.objects.get_or_create(appointment=appointment)
+
+    # ✅ When completed → close chat room
+    if status == "COMPLETED" and hasattr(appointment, "chat_room"):
+        appointment.chat_room.is_closed = True
+        appointment.chat_room.save()
+
     return appointment
