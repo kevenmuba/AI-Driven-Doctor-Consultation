@@ -6,7 +6,13 @@ from doctors.serializers import (
     DoctorProfileCreateUpdateSerializer,
     DoctorProfileReadSerializer,
 )
-from doctors.services import check_overlap, get_verified_doctors, verify_doctor
+from doctors.services import (
+    check_overlap,
+    get_all_doctors,
+    get_verified_doctors,
+    toggle_doctor_verification,
+    verify_doctor,
+)
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -82,3 +88,27 @@ class DoctorAvailabilityRetrieveUpdateDestroyView(
             exclude_id=self.get_object().id,
         )
         serializer.save()
+
+
+class ToggleVerifyDoctorView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def patch(self, request, doctor_id):
+        doctor = toggle_doctor_verification(doctor_id)
+        serializer = DoctorProfileReadSerializer(doctor)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AllDoctorsListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]  # admin-only
+    serializer_class = DoctorProfileReadSerializer
+
+    def get_queryset(self):
+        verified_param = self.request.query_params.get("verified")
+        if verified_param is None:
+            return get_all_doctors()
+        elif verified_param.lower() == "true":
+            return get_all_doctors(verified=True)
+        elif verified_param.lower() == "false":
+            return get_all_doctors(verified=False)
+        return get_all_doctors()

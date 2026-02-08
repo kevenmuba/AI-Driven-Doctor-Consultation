@@ -6,6 +6,15 @@ def create_doctor_profile(user, data):
     return DoctorProfile.objects.create(user=user, **data)
 
 
+def get_all_doctors(verified=None):
+    qs = DoctorProfile.objects.all()
+    if verified is True:
+        qs = qs.filter(is_verified=True)
+    elif verified is False:
+        qs = qs.filter(is_verified=False)
+    return qs
+
+
 def get_verified_doctors():
     return DoctorProfile.objects.filter(is_verified=True)
 
@@ -13,6 +22,13 @@ def get_verified_doctors():
 def verify_doctor(doctor_id):
     doctor = DoctorProfile.objects.get(id=doctor_id)
     doctor.is_verified = True
+    doctor.save()
+    return doctor
+
+
+def toggle_doctor_verification(doctor_id):
+    doctor = DoctorProfile.objects.get(id=doctor_id)
+    doctor.is_verified = not doctor.is_verified  # toggle True/False
     doctor.save()
     return doctor
 
