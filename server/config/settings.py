@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "appointments",
     "ai_triage",
     "chat",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -83,6 +84,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Healthcare Platform API",
+    "VERSION": "1.0.0",
+}
 
 
 # Database
@@ -119,6 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),

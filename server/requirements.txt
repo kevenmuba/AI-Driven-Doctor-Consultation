@@ -5,6 +5,8 @@ django-cors-headers
 psycopg2-binary  
 djangorestframework-simplejwt
 google-genai
+drf-spectacular
+
 
 
 
